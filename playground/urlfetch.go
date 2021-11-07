@@ -32,14 +32,18 @@ func fetchURL(url string, c chan string) {
 func main() {
 	ch := make(chan string)
 
+	fetchPerURL := 100
+
 	start_ts := time.Now()
 	for _, url := range os.Args[1:] {
-		go fetchURL(url, ch)
+		for i := 0; i < fetchPerURL; i++ {
+			go fetchURL(url, ch)
+		}
 	}
 
-	for range os.Args[1:] {
-		s := <-ch
-		fmt.Println(s)
+	for i := 0; i < (len(os.Args)-1)*fetchPerURL; i++ {
+		<-ch
+		// fmt.Println(s)
 	}
 	latency := time.Since(start_ts).Seconds()
 
